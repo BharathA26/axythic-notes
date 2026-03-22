@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  #axythic-note-host {
+    --an-bg: #0d0f14;
+    --an-bg2: #13161e;
+    --an-bg3: #1a1d28;
+    --an-border: rgba(255,255,255,0.07);
+    --an-border2: rgba(255,255,255,0.12);
+    --an-text: #f0f2f8;
+    --an-text2: #9aa3bc;
+    --an-text3: #5a6484;
+    --an-accent: #4f6ef7;
+    --an-accent2: #6c8aff;
+    --an-accentbg: rgba(79,110,247,0.10);
+    --an-green: #22c55e;
+    --an-greenbg: rgba(34,197,94,0.10);
+    --an-amber: #f59e0b;
+    --an-amberbg: rgba(245,158,11,0.10);
+    --an-red: #ef4444;
+    --an-redbg: rgba(239,68,68,0.10);
+    --an-radius: 10px;
+    --an-font: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --an-mono: 'JetBrains Mono', monospace;
+  }
+}
+
+/* Custom raw styles to ensure the container resets everything from Meet */
+.an-root {
+  font-family: var(--an-font);
+  font-size: 13px;
+  color: var(--an-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+.an-scrollbar::-webkit-scrollbar { width: 3px; }
+.an-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.an-scrollbar::-webkit-scrollbar-thumb { background: var(--an-border2); border-radius: 99px; }
+
+/* Custom Animations */
+@keyframes anPulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
+@keyframes anFadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+@keyframes anBounce { 0%,80%,100%{transform:translateY(0);opacity:0.4} 40%{transform:translateY(-4px);opacity:1} }
+@keyframes anToastIn { from{opacity:0;transform:translateX(-50%) translateY(8px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+.animate-an-pulse { animation: anPulse 1.8s ease-in-out infinite; }
+.animate-an-fade-in { animation: anFadeIn 0.3s ease; }
+.animate-an-bounce { animation: anBounce 1.2s ease-in-out infinite; }
+.animate-an-toast-in { animation: anToastIn 0.25s ease; }

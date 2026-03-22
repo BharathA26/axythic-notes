@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(yarn install:*)",
+      "Bash(yarn run:*)",
+      "Bash(python3 -:*)",
+      "Bash(yarn build:*)",
+      "Bash(lsof -ti:5000)",
+      "Bash(xargs kill:*)",
+      "Bash(yarn cache:*)",
+      "Bash(cd:*)",
+      "Bash(npx tsx:*)"
+    ]
+  }
+}

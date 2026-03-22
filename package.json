@@ -1,0 +1,26 @@
+{
+  "name": "axythic-notes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI-powered meeting notes app with Google Meet integration",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=packages/web",
+    "dev:server": "npm run dev --workspace=packages/server",
+    "build:web": "npm run build --workspace=packages/web",
+    "build:server": "npm run build --workspace=packages/server",
+    "build:extension": "npm run build --workspace=packages/extensions",
+    "dev": "concurrently \"npm run dev:web\" \"npm run dev:server\"",
+    "lint": "npm run lint --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

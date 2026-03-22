@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Axythic Notes — Architecture & User Flow</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+      :root {
+        --bg: #0b0f1a;
+        --surface: #131825;
+        --surface2: #1a2035;
+        --border: #232d45;
+        --text: #e2e8f0;
+        --text-muted: #8896b3;
+        --accent: #4f6ef7;
+        --accent-glow: rgba(79, 110, 247, 0.15);
+        --green: #22c55e;
+        --orange: #f59e0b;
+        --red: #ef4444;
+        --purple: #a78bfa;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.7;
+        padding: 40px 20px;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      .header {
+        text-align: center;
+        margin-bottom: 60px;
+        padding: 50px 30px;
+        background: linear-gradient(135deg, var(--surface), var(--surface2));
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+      }
+      .header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(
+          circle at 30% 40%,
+          var(--accent-glow),
+          transparent 50%
+        );
+        pointer-events: none;
+      }
+      .header h1 {
+        font-size: 2.4rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+        position: relative;
+      }
+      .header h1 span {
+        color: var(--accent);
+      }
+      .header p {
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        position: relative;
+      }
+
+      /* Section */
+      .section {
+        margin-bottom: 50px;
+      }
+      .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .section-title .badge {
+        background: var(--accent);
+        color: #fff;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      /* Cards */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 28px;
+        margin-bottom: 16px;
+        transition: border-color 0.2s;
+      }
+      .card:hover {
+        border-color: var(--accent);
+      }
+      .card h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--accent);
+      }
+      .card p,
+      .card li {
+        color: var(--text-muted);
+        font-size: 0.92rem;
+      }
+      .card ul {
+        padding-left: 20px;
+      }
+      .card li {
+        margin-bottom: 6px;
+      }
+      .card li strong {
+        color: var(--text);
+      }
+
+      /* Grid */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 16px;
+      }
+      @media (max-width: 768px) {
+        .grid-2,
+        .grid-3 {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Tech badge */
+      .tech-stack {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .tech {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        padding: 4px 12px;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--text-muted);
+      }
+
+      /* Diagram */
+      .diagram {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 30px;
+        margin-bottom: 16px;
+        overflow-x: auto;
+      }
+      .diagram pre {
+        font-family: "Courier New", monospace;
+        font-size: 0.82rem;
+        line-height: 1.6;
+        color: var(--text);
+        white-space: pre;
+      }
+      .diagram .hl-blue {
+        color: var(--accent);
+      }
+      .diagram .hl-green {
+        color: var(--green);
+      }
+      .diagram .hl-orange {
+        color: var(--orange);
+      }
+      .diagram .hl-purple {
+        color: var(--purple);
+      }
+      .diagram .hl-red {
+        color: var(--red);
+      }
+
+      /* Flow steps */
+      .flow-step {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 24px;
+        align-items: flex-start;
+      }
+      .flow-number {
+        flex-shrink: 0;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+      .flow-number.green {
+        background: var(--green);
+      }
+      .flow-number.orange {
+        background: var(--orange);
+      }
+      .flow-number.purple {
+        background: var(--purple);
+      }
+      .flow-content {
+        flex: 1;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 20px;
+      }
+      .flow-content h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .flow-content p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+      }
+
+      /* Code block */
+      .code-block {
+        background: #0d1117;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 12px 0;
+        overflow-x: auto;
+      }
+      .code-block code {
+        font-family: "Courier New", monospace;
+        font-size: 0.82rem;
+        line-height: 1.7;
+        color: #e6edf3;
+      }
+      .code-block .kw {
+        color: #ff7b72;
+      }
+      .code-block .str {
+        color: #a5d6ff;
+      }
+      .code-block .cm {
+        color: #8b949e;
+      }
+      .code-block .fn {
+        color: #d2a8ff;
+      }
+      .code-block .type {
+        color: #79c0ff;
+      }
+
+      /* Table */
+      .table-wrap {
+        overflow-x: auto;
+        margin: 12px 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.88rem;
+      }
+      th {
+        background: var(--surface2);
+        color: var(--text);
+        font-weight: 600;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      td {
+        color: var(--text-muted);
+      }
+      td strong {
+        color: var(--text);
+      }
+      tr:hover td {
+        background: var(--surface2);
+      }
+
+      /* Connector line */
+      .connector {
+        text-align: center;
+        padding: 10px 0;
+        color: var(--text-muted);
+        font-size: 1.2rem;
+      }
+
+      /* Role comparison */
+      .role-card {
+        padding: 24px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+      }
+      .role-admin {
+        background: linear-gradient(
+          135deg,
+          rgba(239, 68, 68, 0.08),
+          var(--surface)
+        );
+        border-color: rgba(239, 68, 68, 0.3);
+      }
+      .role-user {
+        background: linear-gradient(
+          135deg,
+          rgba(34, 197, 94, 0.08),
+          var(--surface)
+        );
+        border-color: rgba(34, 197, 94, 0.3);
+      }
+      .role-card h3 {
+        margin-bottom: 14px;
+      }
+      .role-card .tag {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-left: 8px;
+      }
+      .tag-admin {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--red);
+      }
+      .tag-user {
+        background: rgba(34, 197, 94, 0.2);
+        color: var(--green);
+      }
+
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 40px 0;
+      }
+
+      .env-table td:first-child {
+        color: var(--accent);
+        font-family: "Courier New", monospace;
+        font-size: 0.82rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- HEADER -->
+      <div class="header">
+        <h1><span>Axythic Notes</span> — Architecture & User Flow</h1>
+        <p>Firebase Auth + MongoDB + GraphQL API + Chrome Extension</p>
+        <div
+          class="tech-stack"
+          style="justify-content: center; margin-top: 20px"
+        >
+          <span class="tech">React + TypeScript</span>
+          <span class="tech">MUI 5</span>
+          <span class="tech">Node.js + Express</span>
+          <span class="tech">GraphQL (Apollo)</span>
+          <span class="tech">MongoDB + Mongoose</span>
+          <span class="tech">Firebase Auth</span>
+          <span class="tech">Chrome MV3 Extension</span>
+          <span class="tech">OpenAI GPT-4o</span>
+        </div>
+      </div>
+
+      <!-- ================================================================ -->
+      <!-- SECTION 1: HIGH-LEVEL ARCHITECTURE -->
+      <!-- ================================================================ -->
+      <div class="section">
+        <div class="section-title">
+          High-Level Architecture <span class="badge">Overview</span>
+        </div>
+
+        <div class="diagram">
+          <pre>
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│                                  <span class="hl-blue">AXYTHIC NOTES SYSTEM</span>                              │
+├─────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                     │
+│   ┌──────────────┐       ┌──────────────────┐        ┌────────────────────┐         │
+│   │  <span class="hl-green">Chrome Ext</span>   │──JWT──▶│   <span class="hl-blue">Node.js API</span>     │◀──JWT──│   <span class="hl-purple">React Web App</span>   │         │
+│   │  (MV3)       │       │  (GraphQL)       │        │   (MUI + Vite)    │         │
+│   └──────┬───────┘       └───────┬──────────┘        └────────┬───────────┘         │
+│          │                       │                            │                     │
+│          │                       ▼                            │                     │
+│          │               ┌──────────────┐                     │                     │
+│          │               │  <span class="hl-orange">MongoDB</span>      │                     │                     │
+│          │               │  (Meetings,  │                     │                     │
+│          │               │   Users,     │                     │                     │
+│          │               │   Actions)   │                     │                     │
+│          │               └──────────────┘                     │                     │
+│          │                                                    │                     │
+│          │               ┌──────────────┐                     │                     │
+│          └──────────────▶│ <span class="hl-red">Firebase Auth</span> │◀────────────────────┘                     │
+│                          │ (Google SSO)  │                                           │
+│                          └──────────────┘                                           │
+│                                                                                     │
+│                          ┌──────────────┐                                           │
+│                          │  <span class="hl-purple">OpenAI API</span>  │  ◀── called by Node.js after                │
+│                          │  (GPT-4o)    │     transcript is received                │
+│                          └──────────────┘                                           │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+</pre>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <h3>Chrome Extension</h3>
+            <p>
+              Captures live captions from Google Meet. On stop, sends transcript
+              + JWT token to backend via GraphQL.
+            </p>
+            <div class="tech-stack">
+              <span class="tech">Chrome MV3</span>
+              <span class="tech">React</span>
+              <span class="tech">Firebase Auth</span>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Backend API</h3>
+            <p>
+              GraphQL API validates JWT, stores data in MongoDB, calls OpenAI
+              for AI processing, manages roles.
+            </p>
+            <div class="tech-stack">
+              <span class="tech">Express</span>
+              <span class="tech">Apollo Server</span>
+              <span class="tech">Mongoose</span>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Web Dashboard</h3>
+            <p>
+              React app for viewing meetings, summaries, and action items.
+              Role-based UI for admin vs. normal users.
+            </p>
+            <div class="tech-stack">
+              <span class="tech">React 18</span>
+              <span class="tech">MUI 5</span>
+              <span class="tech">Apollo Client</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ================================================================ -->
+      <!-- SECTION 2: DATA FLOW — Extension → Backend → MongoDB -->
+      <!-- ================================================================ -->
+      <div class="section">
+        <div class="section-title">
+          Data Flow: Extension → Backend → MongoDB
+          <span class="badge">Core</span>
+        </div>
+
+        <div class="diagram">
+          <pre>
+<span class="hl-green">Chrome Extension</span>                    <span class="hl-blue">Node.js Backend</span>                     <span class="hl-orange">MongoDB</span>
+      │                                    │                                │
+      │  1. User clicks "Stop Recording"   │                                │
+      │                                    │                                │
+      │  2. Get Firebase ID Token          │                                │
+      │     firebase.auth()                │                                │
+      │       .currentUser                 │                                │
+      │       .getIdToken()                │                                │
+      │            │                       │                                │
+      │  3. Send GraphQL Mutation          │                                │
+      │  ─────────────────────────────────▶│                                │
+      │  POST /graphql                     │                                │
+      │  Authorization: Bearer &lt;JWT&gt;       │                                │
+      │  mutation { createMeeting(...) }   │                                │
+      │                                    │                                │
+      │                                    │  4. Verify JWT with            │
+      │                                    │     Firebase Admin SDK         │
+      │                                    │     admin.auth()               │
+      │                                    │       .verifyIdToken(token)    │
+      │                                    │            │                   │
+      │                                    │  5. Extract uid, email, role   │
+      │                                    │            │                   │
+      │                                    │  6. Call OpenAI API            │
+      │                                    │     → summary                  │
+      │                                    │     → MOM                      │
+      │                                    │     → action items             │
+      │                                    │            │                   │
+      │                                    │  7. Save to MongoDB            │
+      │                                    │  ─────────────────────────────▶│
+      │                                    │     Meeting.create({           │
+      │                                    │       userId, transcript,      │
+      │                                    │       summary, mom,            │
+      │                                    │       actionItems,             │
+      │                                    │       participants             │
+      │                                    │     })                         │
+      │                                    │  ◀─────────────────────────────│
+      │                                    │     return saved document      │
+      │  ◀─────────────────────────────────│                                │
+      │  8. Return meeting data            │                                │
+      │                                    │                                │
+</pre>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ================================================================ -->
+      <!-- SECTION 3: AUTH FLOW -->
+      <!-- ================================================================ -->
+      <div class="section">
+        <div class="section-title">
+          Authentication Flow <span class="badge">Firebase Auth Only</span>
+        </div>
+
+        <div class="diagram">
+          <pre>
+<span class="hl-purple">User (Browser/Extension)</span>           <span class="hl-red">Firebase Auth</span>              <span class="hl-blue">Node.js Backend</span>           <span class="hl-orange">MongoDB</span>
+      │                                  │                          │                       │
+      │  1. Click "Sign in with Google"  │                          │                       │
+      │  ────────────────────────────────▶                          │                       │
+      │                                  │                          │                       │
+      │  2. Google OAuth popup           │                          │                       │
+      │  ◀────────────────────────────────                          │                       │
+      │     returns: uid, email,         │                          │                       │
+      │     displayName, photoURL        │                          │                       │
+      │              │                   │                          │                       │
+      │  3. Get JWT (ID Token)           │                          │                       │
+      │     getIdToken(true)             │                          │                       │
+      │              │                   │                          │                       │
+      │  4. Send JWT with first request  │                          │                       │
+      │  ──────────────────────────────────────────────────────────▶│                       │
+      │     Authorization: Bearer &lt;JWT&gt;  │                          │                       │
+      │                                  │                          │                       │
+      │                                  │  5. Verify JWT           │                       │
+      │                                  │◀─────────────────────────│                       │
+      │                                  │  admin.auth()            │                       │
+      │                                  │    .verifyIdToken(jwt)   │                       │
+      │                                  │─────────────────────────▶│                       │
+      │                                  │  return: { uid, email }  │                       │
+      │                                  │                          │                       │
+      │                                  │                          │  6. Find or Create    │
+      │                                  │                          │     User in MongoDB   │
+      │                                  │                          │  ────────────────────▶│
+      │                                  │                          │  User.findOneAndUpdate│
+      │                                  │                          │  ({ firebaseUid: uid }│
+      │                                  │                          │   , { email, name,    │
+      │                                  │                          │     role: "user" },   │
+      │                                  │                          │   { upsert: true })   │
+      │                                  │                          │  ◀────────────────────│
+      │                                  │                          │                       │
+      │  ◀──────────────────────────────────────────────────────────│                       │
+      │  7. Return user data + role      │                          │                       │
+      │                                  │                          │                       │
+</pre>
+        </div>
+
+        <div class="card">
+          <h3>Key Point: Firebase = Auth Only</h3>
+          <p>
+            Firebase handles <strong>only</strong> Google Sign-In and JWT token
+            issuance. All user profile data (name, email, role, avatar) and
+            meeting data is stored in <strong>MongoDB</strong>. The backend
+            verifies the Firebase JWT, extracts the <code>uid</code>, and uses
+            it to look up the user in MongoDB.
+          </p>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ================================================================ -->
+      <!-- SECTION 4: ROLES -->
+      <!-- ================================================================ -->
+      <div class="section">
+        <div class="section-title">
+          Role-Based Access <span class="badge">Admin vs User</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="role-card role-admin">
+            <h3>Admin <span class="tag tag-admin">ADMIN</span></h3>
+            <ul>
+              <li>
+                <strong>View all meetings</strong> across every user in the
+                organization
+              </li>
+              <li>
+                <strong>Manage users</strong> — view list, change roles (user ↔
+                admin), deactivate accounts
+              </li>
+              <li>
+                <strong>Delete meetings</strong> — remove any meeting record
+              </li>
+              <li>
+                <strong>View analytics</strong> — org-wide stats (total
+                meetings, active users, action item completion rates)
+              </li>
+              <li>
+                <strong>Reassign action items</strong> — assign tasks from any
+                meeting to any user
+              </li>
+              <li>
+                <strong>Export data</strong> — bulk export meetings as CSV/PDF
+              </li>
+            </ul>
+          </div>
+          <div class="role-card role-user">
+            <h3>Normal User <span class="tag tag-user">USER</span></h3>
+            <ul>
+              <li>
+                <strong>View own meetings</strong> — only meetings they
+                participated in or created
+              </li>
+              <li>
+                <strong>Capture meetings</strong> — use the Chrome extension to
+                record transcripts
+              </li>
+              <li>
+                <strong>View AI summaries</strong> — read summary, MOM, action
+                items for their meetings
+              </li>
+              <li>
+                <strong>Update action items</strong> — change status of their
+                own assigned tasks
+              </li>
+              <li>
+                <strong>Profile management</strong> — update their own display
+                name, avatar
+              </li>
+              <li>
+                <strong>Search & filter</strong> — search within their own
+                meeting history
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top: 16px">
+          <h3>Role Assignment Logic</h3>
+          <ul>
+            <li>
+              <strong>First user</strong> to sign up is automatically assigned
+              <code>admin</code> role
+            </li>
+            <li>
+              <strong>All subsequent users</strong> default to
+              <code>user</code> role
+            </li>
+            <li>
+              <strong>Admins</strong> can promote/demote other users via the
+              dashboard
+            </li>
+            <li>
+              Role is stored in <strong>MongoDB</strong> (not in Firebase custom
+              claims) for simplicity
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ================================================================ -->
+      <!-- SECTION 5: MONGODB SCHEMAS -->
+      <!-- ================================================================ -->
+      <div class="section">
+        <div class="section-title">
+          MongoDB Schemas <span class="badge">Mongoose</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>User Collection</h3>
+            <div class="code-block">
+              <code
+                ><span class="cm">// models/User.ts</span>
+                {
+                <span class="type">firebaseUid</span>: String,
+                <span class="cm">// from Firebase Auth</span>
+                <span class="type">email</span>: String,
+                <span class="type">displayName</span>: String,
+                <span class="type">photoURL</span>: String,
+                <span class="type">role</span>:
+                <span class="str">"admin"</span> |
+                <span class="str">"user"</span>,
+                <span class="type">isActive</span>: Boolean,
+                <span class="type">lastLogin</span>: Date,
+                <span class="type">createdAt</span>: Date,
+                <span class="type">updatedAt</span>: Date }</code
+              >
+            </div>
+          </div>
+          <div class="card">
+            <h3>Meeting Collection</h3>
+            <div class="code-block">
+              <code
+                ><span class="cm">// models/Meeting.ts</span>
+                {
+                <span class="type">title</span>: String,
+                <span class="type">createdBy</span>: ObjectId → User,
+                <span class="type">date</span>: Date,
+                <span class="type">duration</span>: Number,
+                <span class="cm">// minutes</span>
+                <span class="type">participants</span>: [String],
+                <span class="type">transcript</span>: String,
+                <span class="type">summary</span>: String,
+                <span class="cm">// AI-generated</span>
+                <span class="type">mom</span>: String,
+                <span class="cm">// AI-generated</span>
+                <span class="type">actionItems</span>: [{
+                <span class="type">description</span>: String,
+                <span class="type">assignee</span>: String,
+                <span class="type">dueDate</span>: Date,
+                <span class="type">status</span>:
+                <span class="str">"pending"</span> |
+                <span class="str">"in_progress"</span> |
+                <span class="str">"completed"</span>
+                }],
+                <span class="type">createdAt</span>: Date,
+                <span class="type">updatedAt</span>: Date }</code
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ================================================================ -->
+      <!-- SECTION 6: GRAPHQL API -->
+      <!-- ================================================================ -->
+      <div class="section">
+        <div class="section-title">
+          GraphQL API Design <span class="badge">Schema</span>
+        </div>
+
+        <div class="card">
+          <h3>Queries</h3>
+          <div class="code-block">
+            <code
+              ><span class="kw">type</span> <span class="type">Query</span> {
+              <span class="cm"># Any authenticated user</span>
+              <span class="fn">me</span>: User!
+              <span class="fn">meeting</span>(id: ID!): Meeting!
+              <span class="fn">myMeetings</span>(page: Int, limit: Int, search:
+              String): MeetingPage!
+              <span class="fn">myActionItems</span>(status: ActionStatus):
+              [ActionItem!]!
+
+              <span class="cm"># Admin only</span>
+              <span class="fn">allMeetings</span>(page: Int, limit: Int, search:
+              String): MeetingPage! <span class="fn">allUsers</span>(page: Int,
+              limit: Int): UserPage! <span class="fn">dashboardStats</span>:
+              DashboardStats! }</code
+            >
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Mutations</h3>
+          <div class="code-block">
+            <code
+              ><span class="kw">type</span> <span class="type">Mutation</span> {
+              <span class="cm"># Any authenticated user</span>
+              <span class="fn">createMeeting</span>(input: CreateMeetingInput!):
+              Meeting! <span class="fn">updateActionItem</span>(meetingId: ID!,
+              actionId: ID!, status: ActionStatus!): Meeting!
+              <span class="fn">updateProfile</span>(input: UpdateProfileInput!):
+              User!
+
+              <span class="cm"># Admin only</span>
+              <span class="fn">updateUserRole</span>(userId: ID!, role: Role!):
+              User! <span class="fn">deactivateUser</span>(userId: ID!): User!
+              <span class="fn">deleteMeeting</span>(meetingId: ID!): Boolean!
+              }</code
+            >
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Auth Middleware (Context)</h3>
+          <div class="code-block">
+            <code
+              ><span class="cm"
+                >// Every GraphQL request goes through this</span
+              >
+              <span class="kw">async function</span>
+              <span class="fn">context</span>({ req }) {
+              <span class="kw">const</span> token =
+              req.headers.authorization?.replace(<span class="str"
+                >'Bearer '</span
+              >, <span class="str">''</span>);
+              <span class="kw">if</span> (!token)
+              <span class="kw">throw new</span> AuthenticationError(<span
+                class="str"
+                >'No token'</span
+              >);
+
+              <span class="cm">// 1. Verify with Firebase Admin</span>
+              <span class="kw">const</span> decoded =
+              <span class="kw">await</span> admin.auth().verifyIdToken(token);
+
+              <span class="cm">// 2. Find or create user in MongoDB</span>
+              <span class="kw">const</span> user =
+              <span class="kw">await</span> User.findOneAndUpdate( {
+              firebaseUid: decoded.uid }, { email: decoded.email, displayName:
+              decoded.name, photoURL: decoded.picture, lastLogin:
+              <span class="kw">new</span> Date() }, { upsert:
+              <span class="kw">true</span>, new: <span class="kw">true</span> }
+              );
+
+              <span class="kw">return</span> { user };
+              <span class="cm">// available in all resolvers</span> }</code
+            >
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ================================================================ -->
+      <!-- SECTION 7: END-TO-END USER FLOWS -->
+      <!-- ================================================================ -->
+      <div class="section">
+        <div class="section-title">
+          End-to-End User Flows <span class="badge">Step by Step</span>
+        </div>
+
+        <!-- FLOW A: First-time Sign Up -->
+        <h3 style="margin: 30px 0 20px; color: var(--accent)">
+          Flow A — First-Time Sign Up
+        </h3>
+
+        <div class="flow-step">
+          <div class="flow-number">1</div>
+          <div class="flow-content">
+            <h4>User visits web app</h4>
+            <p>
+              Opens <code>https://app.axythic.com</code> → sees login page with
+              "Sign in with Google" button.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number">2</div>
+          <div class="flow-content">
+            <h4>Google OAuth</h4>
+            <p>
+              Firebase SDK opens Google popup → user selects their Google
+              account → Firebase returns user object with <code>uid</code>,
+              <code>email</code>, <code>displayName</code>,
+              <code>photoURL</code>.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number">3</div>
+          <div class="flow-content">
+            <h4>JWT sent to backend</h4>
+            <p>
+              Frontend calls <code>getIdToken()</code> → stores JWT in memory
+              (not localStorage) → sends with every GraphQL request as
+              <code>Authorization: Bearer &lt;token&gt;</code>.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number green">4</div>
+          <div class="flow-content">
+            <h4>Backend creates user in MongoDB</h4>
+            <p>
+              Auth middleware verifies JWT → finds no existing user → creates
+              new document in <code>users</code> collection with
+              <code>role: "user"</code> (or <code>"admin"</code> if first user).
+              Returns user data.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number green">5</div>
+          <div class="flow-content">
+            <h4>Dashboard loads</h4>
+            <p>
+              Web app queries <code>me</code> → gets role → renders appropriate
+              dashboard (admin or user view). First visit shows empty state with
+              prompt to install Chrome extension.
+            </p>
+          </div>
+        </div>
+
+        <!-- FLOW B: Meeting Capture -->
+        <h3 style="margin: 40px 0 20px; color: var(--green)">
+          Flow B — Capturing a Meeting
+        </h3>
+
+        <div class="flow-step">
+          <div class="flow-number green">1</div>
+          <div class="flow-content">
+            <h4>User joins Google Meet</h4>
+            <p>
+              Chrome extension detects the Google Meet URL → injects content
+              script → caption observer starts watching for captions.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number green">2</div>
+          <div class="flow-content">
+            <h4>Live capture begins</h4>
+            <p>
+              User clicks "Start Capture" in the extension popup or the injected
+              panel → background service worker starts accumulating transcript
+              segments with speaker names and timestamps.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number green">3</div>
+          <div class="flow-content">
+            <h4>Meeting ends → User clicks "Stop"</h4>
+            <p>
+              Extension gathers all segments, formats into full transcript
+              string, collects participant names.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number orange">4</div>
+          <div class="flow-content">
+            <h4>Extension sends data to backend</h4>
+            <p>
+              Gets Firebase JWT from the logged-in user → sends
+              <code>createMeeting</code> GraphQL mutation with transcript,
+              title, participants, duration. JWT in Authorization header.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number orange">5</div>
+          <div class="flow-content">
+            <h4>Backend processes with AI</h4>
+            <p>
+              Receives transcript → calls OpenAI GPT-4o → generates summary,
+              MOM, and action items → saves complete meeting document to
+              MongoDB.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number purple">6</div>
+          <div class="flow-content">
+            <h4>User views results in dashboard</h4>
+            <p>
+              Web app shows new meeting in the list → user clicks to see
+              AI-generated summary, minutes of meeting, and assigned action
+              items with status tracking.
+            </p>
+          </div>
+        </div>
+
+        <!-- FLOW C: Admin User Management -->
+        <h3 style="margin: 40px 0 20px; color: var(--red)">
+          Flow C — Admin Managing Users
+        </h3>
+
+        <div class="flow-step">
+          <div class="flow-number" style="background: var(--red)">1</div>
+          <div class="flow-content">
+            <h4>Admin opens Users panel</h4>
+            <p>
+              Sidebar shows "Users" nav item (admin only) → queries
+              <code>allUsers</code> → displays table with name, email, role,
+              last login, status.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number" style="background: var(--red)">2</div>
+          <div class="flow-content">
+            <h4>Admin changes a user's role</h4>
+            <p>
+              Clicks role dropdown → selects "Admin" or "User" → fires
+              <code>updateUserRole</code> mutation → backend checks requester is
+              admin → updates MongoDB → UI reflects change.
+            </p>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-number" style="background: var(--red)">3</div>
+          <div class="flow-content">
+            <h4>Admin views all meetings</h4>
+            <p>
+              Admin dashboard shows all meetings across the org → can filter by
+              user, date range, search keywords. Can delete any meeting.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ================================================================ -->
+      <!-- SECTION 8: Extension Auth -->
+      <!-- ================================================================ -->
+      <div class="section">
+        <div class="section-title">
+          Extension Authentication <span class="badge">Critical</span>
+        </div>
+
+        <div class="card">
+          <h3>How the Chrome Extension Gets a Firebase JWT</h3>
+          <ul>
+            <li>
+              <strong>Option used: chrome.identity API</strong> — The extension
+              uses <code>chrome.identity.getAuthToken()</code> to get a Google
+              OAuth token, then exchanges it with Firebase using
+              <code
+                >signInWithCredential(GoogleAuthProvider.credential(null,
+                token))</code
+              >.
+            </li>
+            <li>
+              Once signed in, the extension calls <code>getIdToken()</code> on
+              the Firebase user to get a JWT.
+            </li>
+            <li>This JWT is sent with every GraphQL request to the backend.</li>
+            <li>
+              The token auto-refreshes (Firebase SDK handles this) — valid for 1
+              hour.
+            </li>
+          </ul>
+        </div>
+
+        <div class="diagram">
+          <pre>
+<span class="hl-green">Chrome Extension</span>                  <span class="hl-orange">Google OAuth</span>              <span class="hl-red">Firebase Auth</span>
+      │                                 │                         │
+      │  1. chrome.identity             │                         │
+      │     .getAuthToken()             │                         │
+      │  ──────────────────────────────▶│                         │
+      │  ◀──────────────────────────────│                         │
+      │     Google OAuth Token          │                         │
+      │              │                  │                         │
+      │  2. firebase.auth()             │                         │
+      │     .signInWithCredential(      │                         │
+      │       GoogleAuthProvider         │                         │
+      │       .credential(token))       │                         │
+      │  ────────────────────────────────────────────────────────▶│
+      │  ◀────────────────────────────────────────────────────────│
+      │     Firebase User + JWT         │                         │
+      │              │                  │                         │
+      │  3. user.getIdToken()           │                         │
+      │     → use this JWT for          │                         │
+      │       all backend requests      │                         │
+      │                                 │                         │
+</pre>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ================================================================ -->
+      <!-- SECTION 9: Environment Variables -->
+      <!-- ================================================================ -->
+      <div class="section">
+        <div class="section-title">
+          Environment Variables <span class="badge">Config</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h3>Backend — <code>.env</code></h3>
+            <div class="table-wrap">
+              <table class="env-table">
+                <tr>
+                  <th>Variable</th>
+                  <th>Purpose</th>
+                </tr>
+                <tr>
+                  <td>PORT</td>
+                  <td>Server port (5002)</td>
+                </tr>
+                <tr>
+                  <td>MONGODB_URI</td>
+                  <td>mongodb://localhost:27017/axythic</td>
+                </tr>
+                <tr>
+                  <td>FIREBASE_PROJECT_ID</td>
+                  <td>Firebase project ID for JWT verification</td>
+                </tr>
+                <tr>
+                  <td>FIREBASE_CLIENT_EMAIL</td>
+                  <td>Service account email</td>
+                </tr>
+                <tr>
+                  <td>FIREBASE_PRIVATE_KEY</td>
+                  <td>Service account private key</td>
+                </tr>
+                <tr>
+                  <td>OPENAI_API_KEY</td>
+                  <td>OpenAI API key for AI processing</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Frontend — <code>.env</code></h3>
+            <div class="table-wrap">
+              <table class="env-table">
+                <tr>
+                  <th>Variable</th>
+                  <th>Purpose</th>
+                </tr>
+                <tr>
+                  <td>VITE_FIREBASE_API_KEY</td>
+                  <td>Firebase web API key</td>
+                </tr>
+                <tr>
+                  <td>VITE_FIREBASE_AUTH_DOMAIN</td>
+                  <td>Auth domain</td>
+                </tr>
+                <tr>
+                  <td>VITE_FIREBASE_PROJECT_ID</td>
+                  <td>Project ID</td>
+                </tr>
+                <tr>
+                  <td>VITE_API_URL</td>
+                  <td>Backend GraphQL URL</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- ================================================================ -->
+      <!-- SECTION 10: Migration TODO -->
+      <!-- ================================================================ -->
+      <div class="section">
+        <div class="section-title">
+          Migration Checklist
+          <span class="badge">From Firestore → MongoDB</span>
+        </div>
+
+        <div class="card">
+          <h3>What Changes from Current Codebase</h3>
+          <div class="table-wrap">
+            <table>
+              <tr>
+                <th>Component</th>
+                <th>Current (Firestore)</th>
+                <th>New (MongoDB)</th>
+              </tr>
+              <tr>
+                <td><strong>Backend DB</strong></td>
+                <td>Firebase Admin → Firestore</td>
+                <td>Mongoose → MongoDB (local)</td>
+              </tr>
+              <tr>
+                <td><strong>Backend Auth</strong></td>
+                <td>Firebase Admin (already correct)</td>
+                <td>Firebase Admin (no change)</td>
+              </tr>
+              <tr>
+                <td><strong>Backend Models</strong></td>
+                <td>None (schemaless Firestore)</td>
+                <td>Add Mongoose schemas for User, Meeting</td>
+              </tr>
+              <tr>
+                <td><strong>Backend Resolvers</strong></td>
+                <td>Firestore .collection().get()</td>
+                <td>Mongoose Model.find() / .create()</td>
+              </tr>
+              <tr>
+                <td><strong>Frontend Auth</strong></td>
+                <td>Firebase client SDK (no change)</td>
+                <td>Firebase client SDK (no change)</td>
+              </tr>
+              <tr>
+                <td><strong>Frontend Data</strong></td>
+                <td>Direct Firestore reads (if any)</td>
+                <td>All data via GraphQL only</td>
+              </tr>
+              <tr>
+                <td><strong>Web .env</strong></td>
+                <td>All VITE_FIREBASE_* vars</td>
+                <td>Keep Auth vars, remove Firestore-specific ones</td>
+              </tr>
+              <tr>
+                <td><strong>Server .env</strong></td>
+                <td>FIREBASE_* for admin</td>
+                <td>Keep FIREBASE_* for auth, add MONGODB_URI</td>
+              </tr>
+              <tr>
+                <td><strong>New Dependencies</strong></td>
+                <td>—</td>
+                <td><code>mongoose</code> package in server</td>
+              </tr>
+              <tr>
+                <td><strong>Role System</strong></td>
+                <td>None</td>
+                <td>User model with role field + middleware guard</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <!-- FOOTER -->
+      <div
+        style="
+          text-align: center;
+          padding: 30px;
+          color: var(--text-muted);
+          font-size: 0.85rem;
+        "
+      >
+        Axythic Notes — Architecture Document v2.0<br />
+        Firebase Auth + MongoDB + GraphQL + Role-Based Access<br />
+        <span style="color: var(--accent)">Ready for implementation</span>
+      </div>
+    </div>
+  </body>
+</html>
