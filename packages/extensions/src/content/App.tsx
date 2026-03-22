@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { Mic, X, ChevronDown, Activity, List, Settings, Search, Trash2, CheckCircle2, Star } from 'lucide-react';
+import { Mic, X, ChevronDown, Activity, List, Settings, Search, Trash2, CheckCircle2, Star, Upload, LogIn, User } from 'lucide-react';
 import { setupCaptionObserver, Segment } from './observer';
 
 interface AppProps {
@@ -18,6 +18,11 @@ export default function App({ platform }: AppProps) {
   const [activeSpeaker, setActiveSpeaker] = useState<{name: string, isTyping: boolean} | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // ── Auth & Save state ─────────────────────────────────────────────────────
+  const [authUser, setAuthUser]     = useState<{ email: string; displayName: string | null } | null>(null);
+  const [isSaving, setIsSaving]     = useState(false);
+  const [saveResult, setSaveResult] = useState<'success' | 'error' | null>(null);
+
   // Helper to check context
   const checkContext = () => {
     if (!chrome.runtime?.id) {
@@ -26,6 +31,15 @@ export default function App({ platform }: AppProps) {
     }
     return true;
   };
+
+  // ── Check auth status on mount ────────────────────────────────────────────
+  useEffect(() => {
+    if (!checkContext()) return;
+    chrome.runtime.sendMessage({ type: 'GET_AUTH_STATUS' }, (res) => {
+      if (chrome.runtime.lastError) return;
+      if (res?.user) setAuthUser(res.user);
+    });
+  }, []);
 
   // Load persistence
   useEffect(() => {
@@ -95,6 +109,14 @@ export default function App({ platform }: AppProps) {
     }
   }, [activeSpeaker]);
 
+  // Clear save result after 4 seconds
+  useEffect(() => {
+    if (saveResult) {
+      const t = setTimeout(() => setSaveResult(null), 4000);
+      return () => clearTimeout(t);
+    }
+  }, [saveResult]);
+
   const [copySuccess, setCopySuccess] = useState(false);
 
   const toggleStar = (id: string) => {
@@ -122,6 +144,53 @@ export default function App({ platform }: AppProps) {
     a.download = `axythic-transcript-${new Date().toISOString().slice(0,10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  // ── Save Meeting to Backend ───────────────────────────────────────────────
+  const handleSaveMeeting = () => {
+    if (segments.length === 0 || isSaving) return;
+    if (!checkContext()) return;
+
+    setIsSaving(true);
+    setSaveResult(null);
+
+    // Build the transcript text from segments
+    const transcript = segments
+      .map(s => `${s.speaker} [${s.timestamp}]: ${s.text}`)
+      .join('\n');
+
+    // Collect unique participant names
+    const participants = [...new Set(segments.map(s => s.speaker))];
+
+    chrome.runtime.sendMessage({
+      type: 'SAVE_MEETING',
+      transcript,
+      participants,
+      title: `${platform.name} Meeting — ${new Date().toLocaleString()}`,
+    }, (res) => {
+      setIsSaving(false);
+      if (chrome.runtime.lastError) {
+        setSaveResult('error');
+        return;
+      }
+      if (res?.success) {
+        setSaveResult('success');
+      } else {
+        setSaveResult('error');
+      }
+    });
+  };
+
+  // ── Open popup for sign-in ────────────────────────────────────────────────
+  const handleSignInClick = () => {
+    if (!checkContext()) return;
+    // Trigger Google sign-in from the background
+    chrome.runtime.sendMessage({ type: 'SIGN_IN_GOOGLE' }, (res) => {
+      if (chrome.runtime.lastError) return;
+      if (res?.success && res.user) {
+        setAuthUser(res.user);
+      }
+    });
   };
 
   const handleClearAll = () => {
@@ -162,6 +231,25 @@ export default function App({ platform }: AppProps) {
             <span className="font-bold tracking-tight text-[14px]">Axythic Note</span>
           </div>
           <div className="flex items-center gap-1.5">
+            {/* Auth indicator */}
+            {authUser ? (
+              <div
+                className="flex items-center gap-1.5 bg-an-greenbg border border-an-green/20 px-2 py-0.5 rounded-md text-[10px] font-semibold text-an-green"
+                title={authUser.email}
+              >
+                <User size={10} />
+                <span className="max-w-[80px] truncate">{authUser.displayName || authUser.email}</span>
+              </div>
+            ) : (
+              <button
+                onClick={handleSignInClick}
+                className="flex items-center gap-1 bg-an-accentbg border border-an-accent/30 px-2 py-0.5 rounded-md text-[10px] font-semibold text-an-accent2 hover:bg-an-accent/20 transition-colors"
+                title="Sign in to save meetings"
+              >
+                <LogIn size={10} />
+                Sign In
+              </button>
+            )}
             <button
               onClick={() => setIsVisible(false)}
               className="w-[26px] h-[26px] flex items-center justify-center rounded-md text-an-text3 hover:bg-an-bg3 hover:text-an-text transition-colors"
@@ -195,6 +283,24 @@ export default function App({ platform }: AppProps) {
             <X size={14} className="text-red-400 shrink-0" />
             <div className="text-[10px] text-red-100 font-bold uppercase leading-tight">
               Extension Updated. <button onClick={() => window.location.reload()} className="underline hover:text-white">Refresh page</button> to continue capturing.
+            </div>
+          </div>
+        )}
+
+        {/* SAVE RESULT BANNER */}
+        {saveResult === 'success' && (
+          <div className="bg-an-greenbg border border-an-green/30 p-2 mb-2.5 rounded-lg flex items-center gap-2.5">
+            <CheckCircle2 size={14} className="text-an-green shrink-0" />
+            <div className="text-[11px] text-an-green font-bold">
+              Meeting saved! View it in your <button onClick={() => window.open('http://localhost:3000', '_blank')} className="underline hover:text-white">Dashboard</button>.
+            </div>
+          </div>
+        )}
+        {saveResult === 'error' && (
+          <div className="bg-red-500/20 border border-red-500/30 p-2 mb-2.5 rounded-lg flex items-center gap-2.5">
+            <X size={14} className="text-red-400 shrink-0" />
+            <div className="text-[11px] text-red-300 font-bold">
+              Failed to save. {!authUser ? 'Please sign in first.' : 'Check server connection.'}
             </div>
           </div>
         )}
@@ -352,6 +458,20 @@ export default function App({ platform }: AppProps) {
             <Settings size={14} /> Application Settings
           </div>
 
+          {/* Auth status */}
+          <div className="p-4 rounded-xl bg-an-bg3/30 border border-an-border">
+            <div className="text-[13px] font-bold text-an-text mb-1">Account</div>
+            {authUser ? (
+              <div className="text-[11px] text-an-green">
+                Signed in as <strong>{authUser.email}</strong>
+              </div>
+            ) : (
+              <div className="text-[11px] text-an-text3">
+                Not signed in. Click <strong>Sign In</strong> in the header to connect your account.
+              </div>
+            )}
+          </div>
+
           <div className="p-4 rounded-xl bg-an-bg3/30 border border-an-border flex items-center justify-between">
             <div>
               <div className="text-[13px] font-bold text-an-text mb-1">Auto-scroll Transcript</div>
@@ -403,6 +523,20 @@ export default function App({ platform }: AppProps) {
             className="bg-an-bg3 border border-an-border2 rounded-lg px-3.5 py-1.5 text-an-text2 text-[10px] font-bold uppercase tracking-tight hover:border-an-accent hover:text-an-accent2 transition-all shadow-sm disabled:opacity-30 disabled:pointer-events-none"
           >
             Export TXT
+          </button>
+          {/* SAVE MEETING button — the key new feature */}
+          <button
+            onClick={handleSaveMeeting}
+            disabled={segments.length === 0 || isSaving}
+            className={`rounded-lg px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-tight transition-all border flex items-center gap-1.5 disabled:opacity-30 disabled:pointer-events-none ${
+              isSaving
+                ? 'bg-an-accentbg border-an-accent/40 text-an-accent2 animate-pulse'
+                : 'bg-an-accent border-an-accent text-white hover:bg-an-accent2 shadow-sm'
+            }`}
+            title={!authUser ? 'Sign in first to save meetings' : 'Save meeting transcript to your dashboard'}
+          >
+            <Upload size={12} />
+            {isSaving ? 'Saving...' : 'Save'}
           </button>
         </div>
       </footer>

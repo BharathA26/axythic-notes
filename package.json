@@ -22,5 +22,11 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "resolutions": {
+    "vite": "5.4.21",
+    "firebase": "12.11.0",
+    "@firebase/app": "0.14.10",
+    "@firebase/component": "0.7.2"
   }
 }

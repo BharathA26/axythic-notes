@@ -4,7 +4,19 @@
   "version": "1.0.0",
   "description": "Capture transcripts seamlessly directly inside Google Meet.",
   "permissions": ["storage", "activeTab", "tabs", "scripting", "identity"],
-  "host_permissions": ["https://meet.google.com/*", "https://*.zoom.us/*", "https://teams.microsoft.com/*"],
+  "host_permissions": [
+    "https://meet.google.com/*",
+    "https://*.zoom.us/*",
+    "https://teams.microsoft.com/*"
+  ],
+  "oauth2": {
+    "client_id": "715730762077-r504qfs2sc713ftscq35mqrq7gpkjp3u.apps.googleusercontent.com",
+    "scopes": [
+      "openid",
+      "email",
+      "profile"
+    ]
+  },
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
@@ -15,12 +27,15 @@
     "default_title": "Axythic Note"
   },
   "background": {
-    "service_worker": "src/background/index.ts",
-    "type": "module"
+    "service_worker": "src/background/index.ts"
   },
   "content_scripts": [
     {
-      "matches": ["https://meet.google.com/*", "https://*.zoom.us/*", "https://teams.microsoft.com/*"],
+      "matches": [
+        "https://meet.google.com/*",
+        "https://*.zoom.us/*",
+        "https://teams.microsoft.com/*"
+      ],
       "js": ["src/content/index.tsx"]
     }
   ],
